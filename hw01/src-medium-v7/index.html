@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'CircleFont';
+            src: url(CircleFont_v2.woff2);
+        }
+
+        h3, div {
+            background-color: rgba(255, 255, 0, 0.1);
+            font-family: 'CircleFont', 'Noto Serif JP', serif;
+            border: solid 1px black;
+            width: 90%;
+            margin: 5px auto;
+            padding: 10px;
+            text-align: center;
+        }
+
+        h3 {
+            color: white;
+            text-shadow: 0 0 6px #FF0000, 0 0 6px #000000;
+            font-size: 18pt;
+        }
+
+        body {
+            background-color: rgba(255, 128, 255, 0.1);
+            font-family: 'CircleFont', 'Noto Serif JP', serif;
+        }
+
+        table {
+            border-collapse: collapse;
+            border: 2px black solid;
+            font-size: 16pt;
+            margin: 10px auto;
+        }
+
+        td, th {
+            border: 1px black solid;
+            padding: 5px;
+            background-color: rgba(128, 255, 255, 0.1);
+        }
+
+        td img {
+            transition: width, height;
+            transition-duration: 0.5s;
+            width: 50px;
+            height: 50px;
+        }
+
+        img:hover {
+            box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+        }
+
+        td:hover img {
+            transition: width, height;
+            transition-duration: 0.5s;
+            width: 100px;
+            height: 100px;
+        }
+
+        td.excellent-kid:hover img {
+            animation: happy 0.5s infinite;
+        }
+
+        td.good-kid:hover img {
+            animation: happy 1.0s infinite;
+        }
+
+        td.fair-kid:hover img {
+            animation: angry 1.5s infinite;
+        }
+
+        td.poor-kid:hover img {
+            animation: angry 0.1s infinite;
+        }
+
+        @keyframes happy {
+            0%, 50%, 100% { transform: translateY(0px); }
+            25%, 75% { transform: translateY(-5px); }
+        }
+
+        @keyframes angry {
+            0%, 100% { transform: translate(1px, 3px); }
+            25% { transform: translate(7px, 2px); }
+            50% { transform: translate(4px, 5px); }
+            75% { transform: translate(12px, 3px); }
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Data Visualization 成績</h3>
+
+    <div id="div1"></div>
+
+    <div id="div2"></div>
+
+    <script type="text/javascript" charset="utf-8">
+        // D3 v7 版本
+        const container1 = d3.select("#div1")
+        .append("table")
+        .append("tr")
+        .selectAll("td")
+        .data([10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1])
+        .enter()
+        .append("td")
+        .text((d, i) => {
+            return isNaN(d) ? '' : d;
+        })
+        .attr("class", (d, i) => {
+            if (d == 10) return "excellent-kid";
+            else if (d >= 7) return "good-kid";
+            else if (d >= 2) return "fair-kid";
+            else return "poor-kid";
+        })
+        .append("img")
+        .attr("src", d => (d <= 10) ? `./svg10/${parseInt((d+1)/2).toString() + (parseInt((d+1)/2)?2-d%2:d>=0?1-d%2:0).toString()}.svg` : null)
+        .attr("x", "0")
+        .attr("y", "0")
+        .attr("width", d => (d + 1) * 60)
+        .attr("height", d => (d + 1) * 60);
+
+        d3.text("data.csv")
+        .then((data) => {
+            const parsedCSV = d3.csvParseRows(data);
+
+            const container = d3.select("#div2")
+            .append("table")
+            .selectAll("tr")
+            .data(parsedCSV)
+            .enter()
+            .append("tr")
+            .selectAll("td")
+            .data((d, rowIndex) => d.map((column, columnIndex) => ({ value: column, rowIndex, columnIndex })))
+            .enter()
+            .append("td")
+            .html(d => {
+                    if (d.columnIndex === 4 && d.rowIndex !== 0) {
+                        const githubAccount = d.value;
+                            const imageSource = `https://raw.githubusercontent.com/${githubAccount}/vis2023f/main/hw00/me.jpg`;
+                            return `<img src="${imageSource}"><hr><a href="https://github.com/${githubAccount}/vis2023f/" target="_blank">${d.value}</a>`;
+                    } else if ((d.columnIndex === 0 || d.columnIndex === 2) && !isNaN(d.value)) {
+                        return d.value;
+                    } else if (d.columnIndex !== 0 && !isNaN(d.value) && d.value !== "") {
+
+						let t = parseInt(d.value)
+						let v = parseInt((t+1)/2).toString() + (parseInt((t+1)/2)?2-t%2:t>=0?1-t%2:0).toString()
+                        return `<img src="./svg10/${v}.svg" width="50" height="50">`;
+                    }
+                    return d.value;
+                })
+                .attr("class", d => {
+                    if (!isNaN(d.value) && d.value !== "") {
+                        if (d.value == 10) return "excellent-kid";
+                        else if (d.value >= 7) return "good-kid";
+                        else if (d.value >= 2) return "fair-kid";
+                        else return "poor-kid";
+                    }
+                })
+                .filter(d => (d.columnIndex === 0 && d.rowIndex === 0))
+                .html(d => d.value);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        table, th, td {
+            border: 1px solid blue;
+            margin: 10px auto;
+            padding: 1px 3px;
+        }
+    </style>
+    <script>
+        function createArray(length) {
+            return new Array(length).fill(null).map(() => []);
+        }
+
+        function getRandomElement(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function generateRandomClass(studentID) {
+            const classRules = [
+                { prefix: '111', middle: '590', className: '資工四' },
+                { prefix: '111', middle: '598', className: '資工碩二' },
+                { prefix: '111', middle: 'C52', className: '電資AI碩二' },
+                { prefix: '111', middle: 'C53', className: '電資資安碩二' },
+                { prefix: '111', middle: 'C71', className: '創新AI碩二' },
+                { prefix: '112', middle: '590', className: '資工三' },
+                { prefix: '112', middle: '598', className: '資工碩一' },
+                { prefix: '112', middle: 'C52', className: '電資AI碩一' },
+                { prefix: '112', middle: 'C53', className: '電資資安碩一' },
+                { prefix: '112', middle: 'C71', className: '創新AI碩一' },
+            ];
+
+            const rule = classRules.find(rule => studentID.startsWith(rule.prefix + rule.middle));
+            return rule ? rule.className : '未知班級';
+        }
+
+        function generateRandomStudentID() {
+            const prefixes = ['111', '112'];
+            const middleNumbers = ['590', '598', 'C52', 'C53', 'C71'];
+            const suffix = ('00' + Math.floor(Math.random() * 1000)).slice(-3);
+            return getRandomElement(prefixes) + getRandomElement(middleNumbers) + suffix;
+        }
+
+        function generateRandomGitHubAccount() {
+            const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            return Array.from({ length: 10 }, () => getRandomElement(characters)).join('');
+        }
+
+        function generateDummyCSV() {
+            const dummyRows = createArray(121);
+
+            dummyRows[0] = ['序號', '班級', '學號', '姓名', 'GitHub帳號', '作業一', '作業二', '作業三', '作業四', '作業五', '作業六', '作業七', '作業八', '作業九', '作業十'];
+
+            dummyRows.slice(1).forEach((row, index) => {
+                row.push(index + 1);
+                const studentID = generateRandomStudentID();
+                row.push(generateRandomClass(studentID));
+                row.push(studentID);
+                row.push(String.fromCharCode(
+                    Math.floor(Math.random() * 0x51ff + 0x4e00),
+                    Math.floor(Math.random() * 0x51ff + 0x4e00),
+                    Math.floor(Math.random() * 0x51ff + 0x4e00)
+                ));
+                row.push(generateRandomGitHubAccount());
+                row.push(...Array.from({ length: 10 }, () => Math.floor(Math.random() * 10)));
+            });
+
+
+            return dummyRows;
+        }
+
+        function displayDummyCSV() {
+            const dummyRows = generateDummyCSV();
+            const tableContent = `<table>${dummyRows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}</table>`;
+            document.getElementById('dummyTable').innerHTML = tableContent;
+        }
+
+        function tableToCSV() {
+            const csvData = generateDummyCSV().map(row => row.join(',')).join('\n');
+            downloadCSVFile(csvData);
+        }
+
+        function downloadCSVFile(csvData) {
+            const csvFile = new Blob([csvData], { type: 'text/csv' });
+            const tempLink = document.createElement('a');
+            tempLink.href = URL.createObjectURL(csvFile);
+            tempLink.download = 'data.csv';
+            tempLink.style.display = 'none';
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+        }
+
+        window.onload = function () {
+            displayDummyCSV();
+        };
+    </script>
+</head>
+
+<body>
+    <br><br>
+    <button type="button" onclick="tableToCSV()">download CSV</button>
+    <div id="dummyTable"></div>
+</body>
+
+</html>

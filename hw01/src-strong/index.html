@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizing US Jail Population Data</title>
+    <style>
+        rect {
+            pointer-events: all;
+            fill-opacity: 0;
+            stroke-opacity: 0;
+            z-index: 1;
+        }
+
+        .tooltip {
+            position: absolute;
+            padding: 10px;
+            background-color: steelblue;
+            color: white;
+            border: 1px solid white;
+            border-radius: 10px;
+            display: none;
+            opacity: .75;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chart-container"></div>
+    <div id="tooltip"></div>
+
+    <!-- Include the D3.js library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Include your custom script file -->
+    <script>
+        const margin = { top: 80, right: 70, bottom: 60, left: 90 };
+        const width = 1500 - margin.left - margin.right;
+        const height = 600 - margin.top - margin.bottom;
+        const transitionDuration = 50;
+        const calculateTotalScore = (d) => d.作業一 + d.作業二 + d.作業三 + d.作業四 + d.作業五 + d.作業六 + d.作業七 + d.作業八 + d.作業九 + d.作業十;
+
+        const x = d3.scaleTime().range([-10, width]);
+        const y = d3.scaleLinear().range([height, 0]);
+
+        const line = d3.line()
+           .x(d => x(d.序號))
+           .y(d => y(d.總分));
+
+
+        const svg = d3.select("#chart-container")
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", `translate(${margin.left},${margin.top})`);
+
+
+
+        const tooltip = d3.select("body")
+          .append("div")
+          .attr("class", "tooltip");
+
+        function preprocessData(data) {
+          data.forEach(d => {
+            d.序號 = +d.序號;
+            d.作業一 = +d.作業一;
+            d.作業二 = +d.作業二;
+            d.作業三 = +d.作業三;
+            d.作業四 = +d.作業四;
+            d.作業五 = +d.作業五;
+            d.作業六 = +d.作業六;
+            d.作業七 = +d.作業七;
+            d.作業八 = +d.作業八;
+            d.作業九 = +d.作業九;
+            d.作業十 = +d.作業十;
+            d.總分 = calculateTotalScore(d);
+          });
+
+          x.domain(d3.extent(data, d => d.序號));
+          y.domain([0, d3.max(data, d => d.總分)]);
+        }
+
+
+        d3.csv("data.csv").then(data => {
+            preprocessData(data);
+
+
+
+            const xTickValues = d3.range(0, 125, 5);
+
+            svg.append("g")
+              .attr("transform", `translate(0,${height + 15})`)
+              .style("font-size", "16px")
+              .call(d3.axisBottom(x)
+                .tickValues(xTickValues)
+                .tickFormat(d3.format("d")))
+              .call(g => g.select(".domain").remove())
+              .selectAll(".tick line")
+              .style("stroke-opacity", 0);
+            svg.selectAll(".tick text")
+              .attr("fill", "#777");
+
+
+            svg.selectAll("xGrid")
+              .data(x.ticks(20).slice(0))
+              .join("line")
+              .attr("x1", d => x(d))
+              .attr("x2", d => x(d))
+              .attr("y1", 0)
+              .attr("y2", height)
+              .attr("stroke", "#e0e0e0")
+              .attr("stroke-width", 0.5);
+
+            svg.append("g")
+              .style("font-size", "16px")
+              .attr("transform", `translate(${width + 10},0)`)
+              .call(d3.axisRight(y)
+                .tickValues(d3.range(0, 70, 5))
+                .tickFormat(d => `${d}`)
+                .tickSize(0)
+                .tickPadding(10))
+              .call(g => g.select(".domain").remove())
+              .selectAll(".tick text")
+              .style("fill", "#777")
+              .style("visibility", "visible");
+
+            svg.append("text")
+              .attr("transform", "rotate(360)")
+              .attr("x", width + 30)
+              .attr("y", -20)
+              .attr("dy", "1em")
+              .style("text-anchor", "middle")
+              .style("font-size", "16px")
+              .style("fill", "#777")
+              .style("font-family", "sans-serif")
+              .text("總分");
+
+
+            svg.selectAll("yGrid")
+              .data(y.ticks((d3.max(data, d => d.作業一) - 0) / 5000).slice(1))
+              .join("line")
+              .attr("x1", 0)
+              .attr("x2", width)
+              .attr("y1", d => y(d))
+              .attr("y2", d => y(d))
+              .attr("stroke", "#e0e0e0")
+              .attr("stroke-width", 0.5);
+
+
+            const path = svg.append("path")
+              .datum(data)
+              .attr("fill", "none")
+              .attr("stroke", "#00BFFF")
+              .attr("stroke-width", 1)
+              .attr("d", line);
+
+
+            const area = d3.area()
+              .x(d => x(d.序號))
+              .y1(d => y(d.總分))
+              .y0(y(0));
+
+            const defs = svg.append("defs");
+
+            const linearGradient = defs.append("linearGradient")
+              .attr("id", "area-gradient")
+              .attr("x1", "20%")
+              .attr("y1", "70%")
+              .attr("x2", "20%")
+              .attr("y2", "100%");
+
+            linearGradient.append("stop")
+              .attr("offset", "0%")
+              .style("stop-color", "#87CEEB")
+              .style("stop-opacity", 0.8);
+
+            linearGradient.append("stop")
+              .attr("offset", "100%")
+              .style("stop-color", "#00BFFF")
+              .style("stop-opacity", 0.9);
+
+
+            svg.append("path")
+              .datum(data)
+              .attr("class", "area")
+              .attr("d", area)
+              .style("fill", "url(#area-gradient)");
+
+
+
+            const circle = svg.append("circle")
+              .attr("r", 0)
+              .attr("fill", "steelblue")
+              .style("stroke", "white")
+              .attr("opacity", 0.7)
+              .style("pointer-events", "none");
+
+
+            const listeningRect = svg.append("rect")
+              .attr("width", width)
+              .attr("height", height);
+
+
+            listeningRect.on("mousemove", function (event) {
+              const [xCoord] = d3.pointer(event, this);
+              const bisectDate = d3.bisector(d => d.序號).left;
+              const x0 = x.invert(xCoord);
+              const i = bisectDate(data, x0, 1);
+              const d0 = data[i - 1];
+              const d1 = data[i];
+              const d = x0 - d0.序號 > d1.序號 - x0 ? d1 : d0;
+              const xPos = x(d.序號);
+              const yPos = y(d.總分);
+
+
+            circle.attr("cx", xPos)
+              .attr("cy", yPos);
+
+
+            circle.transition()
+              .duration(transitionDuration)
+              .attr("r", 5);
+
+
+            tooltip
+              .style("display", "block")
+              .style("left", `${xPos + 100}px`)
+              .style("top", `${yPos + 50}px`)
+              .html(`<strong>序號:</strong> ${d.序號}<br><strong>作業成績:</strong> ${d.總分 !== undefined ? d.總分 : 'N/A'}`);
+            });
+
+
+            listeningRect.on("mouseleave", function () {
+              circle.transition()
+                .duration(transitionDuration)
+                .attr("r", 0);
+
+              tooltip.style("display", "none");
+            });
+
+
+            svg.append("text")
+              .attr("class", "chart-title")
+              .attr("x", width / 2)
+              .attr("y", margin.top - 100)
+              .style("font-size", "30px")
+              .style("font-weight", "bold")
+              .style("font-family", "sans-serif")
+              .style("text-anchor", "middle")
+              .text("作業成績表");
+
+            svg.append("text")
+              .attr("class", "source-credit")
+              .attr("x", width - 1125)
+              .attr("y", height + margin.bottom - 3)
+              .style("font-size", "9px")
+              .style("font-family", "sans-serif")
+        });
+    </script>
+</body>
+</html>
+
