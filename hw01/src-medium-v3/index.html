@@ -137,8 +137,8 @@
                 .html(d => {
                     if (d.columnIndex === 4 && d.rowIndex !== 0) {
                         const githubAccount = d.value;
-                            const imageSource = `https://raw.githubusercontent.com/${githubAccount}/vis2023f/main/hw00/me.jpg`;
-                            return `<img src="${imageSource}"><hr><a href="https://github.com/${githubAccount}/vis2023f/" target="_blank">${d.value}</a>`;
+                        const imageSource = `https://raw.githubusercontent.com/ting151/vis2023f/main/hw00/me.jpg`;
+                        return `<img src="${imageSource}"><hr><a href="https://github.com/${githubAccount}/vis2023f/" target="_blank">${d.value}</a>`;
                     } else if ((d.columnIndex === 0 || d.columnIndex === 2) && !isNaN(d.value)) {
                         return d.value;
                     } else if (d.columnIndex !== 0 && !isNaN(d.value) && d.value !== "") {
