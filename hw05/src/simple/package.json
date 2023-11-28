@@ -1,0 +1,14 @@
+{
+  "name": "68997886c643a8aa",
+  "main": "68997886c643a8aa@24.js",
+  "version": "24.0.0",
+  "homepage": "https://observablehq.com/d/68997886c643a8aa",
+  "author": {
+    "name": "章雅婷's Workspace",
+    "url": "https://observablehq.com/@zhang-ya-ting-ws"
+  },
+  "type": "module",
+  "peerDependencies": {
+    "@observablehq/runtime": "4 - 5"
+  }
+}
