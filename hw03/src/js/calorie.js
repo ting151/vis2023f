@@ -5,6 +5,7 @@ function loadjson() {
     .then(response => response.json())
     .then(data => {
       calorieData = data;
+	  console.log("calorieData = " + calorieData);
       if (calorieIndex < calorieData.length) {
         const point = calorieData[calorieIndex];
         updateIconPosition(point.X, point.Y);

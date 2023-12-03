@@ -64,6 +64,7 @@ function loadjson() {
   fetch(jsonUrl)
     .then(response => response.json())
     .then(data => {
+		console.log(data);
       if (data && data.length > 0) {
         const point = data[currentIndex];
 
