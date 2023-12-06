@@ -1,0 +1,14 @@
+{
+  "name": "760be6c1e580b03a",
+  "main": "760be6c1e580b03a@70.js",
+  "version": "70.0.0",
+  "homepage": "https://observablehq.com/d/760be6c1e580b03a",
+  "author": {
+    "name": "章雅婷's Workspace",
+    "url": "https://observablehq.com/@zhang-ya-ting-ws"
+  },
+  "type": "module",
+  "peerDependencies": {
+    "@observablehq/runtime": "4 - 5"
+  }
+}
