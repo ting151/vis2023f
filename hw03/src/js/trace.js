@@ -17,6 +17,7 @@ function calculatePosition(x, y) {
 }
 
 function updateIconPosition(x, y) {
+  console.log('Updating icon position');
   const { x: iconX, y: iconY } = calculatePosition(x, y);
   icon.style.left = `${iconX}%`;
   icon.style.top = `${iconY}%`;
@@ -33,6 +34,7 @@ function loadjson() {
   fetch(jsonUrl)
     .then(response => response.json())
     .then(data => {
+		 console.log("Hi!!!!!");
       if (data && data.length > 0) {
         const point = data[currentIndex];
 
